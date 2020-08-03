@@ -12,8 +12,8 @@
 
 /**
  * TODO: make these consistent
- * 	-> naming
- * 	-> style (addr vs macro ptr)
+ *     -> naming
+ *     -> style (addr vs macro ptr)
  */
 #define UART0_CTRL_ADDR        0xE0000000
 #define UART0_MODE_ADDR        0xE0000004

@@ -16,63 +16,63 @@ void arm_enable_irq() {
 
 void disable_interrupt59(void)
 {
-	ICDIPTR(14) &= ~0x03000000; //remove processors from interrupt
-	ICDICER(1) = (1 << (59 - 32)); //disable interrupts
+    ICDIPTR(14) &= ~0x03000000; //remove processors from interrupt
+    ICDICER(1) = (1 << (59 - 32)); //disable interrupts
 }
 
 //sets interrupt sensitivity of interrupt52 to ‘sens’
 void set_interrupt59_sensitivity(uint8_t sens)
 {
-	ICDICFR(3) &= ~(0x3 << 22);
-	ICDICFR(3) |= (sens&0x3) << 22;
+    ICDICFR(3) &= ~(0x3 << 22);
+    ICDICFR(3) |= (sens&0x3) << 22;
 }
 
 //sets the interrupt priority of 59 to ‘priority_val’
 void set_interrupt59_priority(uint8_t priority_val)
 {
-	ICDIPR(14) &= ~0xFF000000; //clear priority bits for interrupt 59
-	ICDIPR(14) |= ((priority_val) & 0xF8) << 24; //set top 5 bits based on passed value
+    ICDIPR(14) &= ~0xFF000000; //clear priority bits for interrupt 59
+    ICDIPR(14) |= ((priority_val) & 0xF8) << 24; //set top 5 bits based on passed value
 }
 
 //enables interrupt 59
 void enable_interrupt59()
 {
-	ICDIPTR(14) |= (1 << 24); //set bit 1 of ICDIPTR13 (enable for cpu0)
-	ICDISER(1) = (1 << (59 - 32));
+    ICDIPTR(14) |= (1 << 24); //set bit 1 of ICDIPTR13 (enable for cpu0)
+    ICDISER(1) = (1 << (59 - 32));
 }
 
 void esp32_interrupts_config(ESP32 *instance) {
-	arm_disable_irq();
+    arm_disable_irq();
 
-	ICDDCR = 0; // disable GIC distributor
-	ICCICR = 0x3; // disable IRQ passthrough (use the GIC?)
+    ICDDCR = 0; // disable GIC distributor
+    ICCICR = 0x3; // disable IRQ passthrough (use the GIC?)
 
-	ICCPMR = 0xFF; // set GIC priority to the highest (0xFF)
+    ICCPMR = 0xFF; // set GIC priority to the highest (0xFF)
 
-	// UART0 IRQ ID = 59
-	disable_interrupt59();
-	set_interrupt59_priority(0xA0);
-	set_interrupt59_sensitivity(1);
-	enable_interrupt59();
+    // UART0 IRQ ID = 59
+    disable_interrupt59();
+    set_interrupt59_priority(0xA0);
+    set_interrupt59_sensitivity(1);
+    enable_interrupt59();
 
-	ICDDCR = 1; // reenable GIC distributor
-	// XIL_EXCEPTION_ID_IRQ_INT = 5
-	Xil_ExceptionRegisterHandler(5, irq_handler, instance);
+    ICDDCR = 1; // reenable GIC distributor
+    // XIL_EXCEPTION_ID_IRQ_INT = 5
+    Xil_ExceptionRegisterHandler(5, irq_handler, instance);
 
-	arm_enable_irq();
-	//esp32_clear_interrupts();
+    arm_enable_irq();
+    //esp32_clear_interrupts();
 }
 
 void irq_handler(void *data) {
-	uint32_t interrupt_ID = ICCIAR;
+    uint32_t interrupt_ID = ICCIAR;
 
-	if (interrupt_ID == 59) {
-		ESP32 *inst = data;
-		if (data != NULL && inst->char_recv != NULL) {
-			inst->char_recv(inst);
-		}
-	}
-	ICCEOIR = interrupt_ID;
+    if (interrupt_ID == 59) {
+        ESP32 *inst = data;
+        if (data != NULL && inst->char_recv != NULL) {
+            inst->char_recv(inst);
+        }
+    }
+    ICCEOIR = interrupt_ID;
 }
 
 
