@@ -1,0 +1,58 @@
+#include "at_command.h"
+
+
+/**
+ * A slow, linear search of ESP32 commands.
+ *
+ * IDEALLY: this should be a hashtable but I'm not sure if I should just
+ * redo the project as C++ and use an unordered_map...
+ */
+struct at_command* esp32_lookup_command(ESP32 *inst, const char *line) {
+	const size = sizeof(esp32_commands) / sizeof(ESP32_AT_Command);
+
+	for(int i = 0; i < size; i++) {
+		ESP32_AT_Command *cmd = &esp32_commands[i];
+
+		if (strcmp(cmd->name, line) == 0) {
+			return cmd;
+		}
+	}
+
+	return NULL;
+}
+bool esp32_is_response_end(const char *line) {
+	return (strcmp("OK", line) == 0)
+		|| (strcmp("ERROR", line) == 0);
+}
+
+void esp32_handle_line(ESP32 *inst, const char *line) {
+	if (line == NULL || line[0] == '\0') {
+		// ignore empty strings
+		return;
+	}
+	if (inst->current_command == NULL) {
+		if (inst->boot_status == ESP32_STATUS_READY) {
+			esp32_handle_unexpected(inst, line);
+		}
+		else {
+			xil_printf("[BOOT] '%s'\r\n", line);
+
+			if(strcmp("ready", line) == 0) {
+				// esp32 printed "ready", update status
+				inst->boot_status = ESP32_STATUS_READY;
+				xil_printf("[ ESP] module is ready!\r\n");
+
+				if (inst->on_ready != NULL) {
+					inst->on_ready(inst);
+				}
+			}
+		}
+	} else {
+		xil_printf("[RECV] '%s'\r\n", line);
+		inst->current_command->callback(inst, line);
+	}
+}
+
+void esp32_handle_unexpected(struct esp32state *inst, const char *line) {
+	xil_printf("[ ERR] Unexpected line: '%s'\r\n", line);
+}
