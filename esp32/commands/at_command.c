@@ -1,6 +1,5 @@
 #include "at_command.h"
 
-
 /**
  * A slow, linear search of ESP32 commands.
  *
@@ -33,11 +32,19 @@ struct at_command* esp32_lookup_command(ESP32 *inst, const char *line) {
 
     return NULL;
 }
+
+// maybe unneeded:
 bool esp32_is_response_end(const char *line) {
     return (strcmp("OK", line) == 0)
         || (strcmp("ERROR", line) == 0);
 }
 
+/**
+ * Calls the corresponding handler for a line received (or
+ * displays an error if no matching handler is found).
+ * @param inst The ESP32 instance
+ * @param line The line received
+ */
 void esp32_handle_line(ESP32 *inst, const char *line) {
     if (line == NULL || line[0] == '\0') {
         // ignore empty strings
@@ -66,6 +73,11 @@ void esp32_handle_line(ESP32 *inst, const char *line) {
     }
 }
 
+/**
+ * A function to handle an unexpected command response
+ * @param inst The ESP32 instance
+ * @param line The unexpected line
+ */
 void esp32_handle_unexpected(struct esp32state *inst, const char *line) {
     xil_printf("[ ERR] Unexpected line: '%s'\r\n", line);
 }

@@ -13,10 +13,10 @@
  * A simple rx/tx queue using a circular buffer of strings.
  */
 typedef struct bufferqueue {
-    volatile char buffers[BQ_SCROLLBACK_SIZE][BQ_BUFFER_SIZE];
-    volatile int  char_index;
-    volatile int  buffer_index;
-    volatile int  queue_buffer_index;
+    volatile char buffers[BQ_SCROLLBACK_SIZE][BQ_BUFFER_SIZE]; /*!< Arrays of strings */
+    volatile int  char_index;                                  /*!< The index of the character in a line buffer, i.e. the column. */
+    volatile int  buffer_index;                                /*!< The index of the enqueing */
+    volatile int  queue_buffer_index;                          /*!< The index of the dequeuing */
 } BufferQueue;
 
 void bq_init(BufferQueue *);
