@@ -8,7 +8,20 @@
  * redo the project as C++ and use an unordered_map...
  */
 struct at_command* esp32_lookup_command(ESP32 *inst, const char *line) {
-    const size = sizeof(esp32_commands) / sizeof(ESP32_AT_Command);
+    const int size = sizeof(esp32_commands) / sizeof(ESP32_AT_Command);
+    char *eq = strchr(line, '=');
+
+    if (eq != NULL && *(eq + 1) != '\0') {
+    	/**
+    	 * lil bit questionable, but this will search for a '='
+    	 * i.e. for a set command
+    	 * and replace the next char with the end of string
+    	 *
+    	 * this makes a command like `AT+CWJAP="myssid",...`
+    	 * map to `AT+CWJAP=`
+    	 */
+    	*(eq + 1) = '\0';
+    }
 
     for(int i = 0; i < size; i++) {
         ESP32_AT_Command *cmd = &esp32_commands[i];

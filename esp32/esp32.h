@@ -54,6 +54,5 @@ void esp32_set_ready(ESP32 *inst, void (*on_ready)(ESP32 *));
 void esp32_clear_interrupts();
 void esp32_run_queue(ESP32 *inst);
 int esp32_println(ESP32 *inst, char *buffer);
-char *esp32_prev_buffer(ESP32 *, char *buffer);
 
 #endif

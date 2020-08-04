@@ -9,7 +9,10 @@
 typedef enum {
     ESP32_AT_AT,
     ESP32_AT_RST,
-    ESP32_AT_GMR
+    ESP32_AT_GMR,
+	ESP32_AT_CWMODE,
+	ESP32_AT_CWJAP_QUERY,
+	ESP32_AT_CWJAP_SET,
 } AT_COMMAND_TYPE;
 
 typedef struct at_command {

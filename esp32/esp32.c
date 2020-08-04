@@ -4,13 +4,12 @@
  * Initializes the ESP32 state.
  */
 void esp32_state_init(ESP32 *inst) {
-    inst->buffer_index       = 0;
-    inst->char_index         = 0;
-    inst->queue_buffer_index = ESP32_IDX_INACTIVE;
     inst->boot_status        = ESP32_STATUS_OFF;
     inst->char_recv          = &esp32_char_recv;
     inst->on_ready           = NULL;
     inst->current_command    = NULL;
+
+    bq_init(&inst->rx_queue);
 }
 
 /**
@@ -25,44 +24,8 @@ void esp32_set_ready(ESP32 *inst, void (*on_ready)(ESP32 *)) {
  */
 void esp32_char_recv(ESP32 *inst) {
     char c = *((uint32_t *)UART0_FIFO_ADDR);
-    //xil_printf("%c, %d, %d\n", c, inst->buffer_index, inst->char_index);
 
-    if (inst->char_index < ESP32_BUFFER_SIZE - 1) {
-        volatile char* dest = &inst->buffers[inst->buffer_index][inst->char_index++];
-
-        switch(c) {
-        default:
-            *dest = c;
-            break;
-        case '\r':
-            *dest = '\0';
-            break;
-        case '\n':
-            *dest = '\0';
-            break;
-        }
-
-        if (c == '\n') {
-            inst->char_index = 0;
-            inst->buffer_index++;
-
-            //TODO check if buffer_index exceeds queue_buffer_index
-            //     to ensure the ISR does not "lap" (or overwrite) the
-            //     dequeueing loop...
-            if (inst->buffer_index >= ESP32_SCROLLBACK_SIZE) {
-                inst->buffer_index = 0;
-            }
-
-            if (inst->queue_buffer_index == ESP32_IDX_INACTIVE) {
-                // this should be the only time that the ISR touches queue_buffer_index
-                // sort-of acting as a once-changed semaphore (by the ISR to the normal program)
-                inst->queue_buffer_index = 0;
-            }
-        }
-    } else {
-        // TODO handle this later
-        xil_printf("overflow!\n\r");
-    }
+    bq_putc(&inst->rx_queue, c);
 
     esp32_clear_interrupts();
 }
@@ -79,23 +42,11 @@ void esp32_clear_interrupts() {
  * TODO rename the function? `run' implies too much, whereas process is more apt?
  */
 void esp32_run_queue(ESP32 *inst) {
-    if (inst->queue_buffer_index == ESP32_IDX_INACTIVE) {
-        // no data has been received yet
-        return;
-    }
+	char *line = bq_dequeue(&inst->rx_queue);
 
-    if (inst->buffer_index == inst->queue_buffer_index) {
-        // caught up, hold off until new data has been received
-        return;
-    }
-
-    const char *line = (char *)inst->buffers[inst->queue_buffer_index++];
-
-    if(inst->queue_buffer_index >= ESP32_SCROLLBACK_SIZE) {
-        inst->queue_buffer_index = 0;
-    }
-
-    esp32_handle_line(inst, line);
+	if (line != NULL) {
+		esp32_handle_line(inst, line);
+	}
 }
 
 /**
@@ -192,15 +143,3 @@ void esp32_enable_uart(ESP32 *inst) {
     //UART0_IDR = 1;
 }
 
-/**
- * Gets the previous line in the buffer.
- *
- * @param inst The ESP32 state
- * @param buffer The current line, i.e. the line to offset from.
- */
-char *esp32_prev_buffer(ESP32 *inst, char *buffer) {
-    if (buffer <= inst->buffers[0]) {
-        return (char *)&inst->buffers[ESP32_SCROLLBACK_SIZE - 1];
-    }
-    return buffer - ESP32_BUFFER_SIZE;
-}

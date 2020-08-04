@@ -12,8 +12,9 @@
 #include "sleep.h"
 
 void esp32_ready(ESP32 *inst) {
-    xil_printf("Gonna send an AT+GMR\r\n");
-    esp32_println(inst, "AT+GMR");
+    //xil_printf("Gonna send an AT+GMR\r\n");
+    esp32_println(inst, "AT+CWMODE=3");
+    esp32_println(inst, "AT+CWJAP=\"eggplanet 2\",\"\"");
 }
 
 int main()
