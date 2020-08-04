@@ -10,6 +10,7 @@ void esp32_state_init(ESP32 *inst) {
     inst->current_command    = NULL;
 
     bq_init(&inst->rx_queue);
+    bq_init(&inst->tx_queue);
 }
 
 /**
@@ -42,10 +43,22 @@ void esp32_clear_interrupts() {
  * TODO rename the function? `run' implies too much, whereas process is more apt?
  */
 void esp32_run_queue(ESP32 *inst) {
+	// handle receiving:
 	char *line = bq_dequeue(&inst->rx_queue);
 
 	if (line != NULL) {
 		esp32_handle_line(inst, line);
+	}
+
+	// handle transmitting:
+	if (inst->current_command == NULL) {
+		// only transmit when there's not a command waiting
+
+		line = bq_dequeue(&inst->tx_queue);
+
+		if (line != NULL) {
+			esp32_println(inst, line);
+		}
 	}
 }
 
@@ -59,6 +72,8 @@ int esp32_println(ESP32 *inst, char *buffer) {
     int i = 0;
     int length = strlen(buffer);
     char c;
+
+    xil_printf("[ TX] '%s'\r\n", buffer);
 
     for(; i < length; i++) {
         c = buffer[i];

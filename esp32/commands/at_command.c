@@ -61,7 +61,7 @@ void esp32_handle_line(ESP32 *inst, const char *line) {
             }
         }
     } else {
-        xil_printf("[RECV] '%s'\r\n", line);
+        xil_printf("[RECV] (cb:%s) '%s'\r\n", inst->current_command->name, line);
         inst->current_command->callback(inst, line);
     }
 }
