@@ -6,6 +6,7 @@
 
 typedef struct esp32state {
 	BufferQueue rx_queue;
+	BufferQueue tx_queue;
 
     enum esp32bootstatus {
         ESP32_STATUS_OFF,
