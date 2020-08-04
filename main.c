@@ -13,7 +13,7 @@
 
 void esp32_ready(ESP32 *inst) {
 	bq_enqueue(&inst->tx_queue, "AT+CWMODE=3");
-	bq_enqueue(&inst->tx_queue, "AT+CWJAP=\"eggplanet 2\",\"3605365178\"");
+	bq_enqueue(&inst->tx_queue, "AT+CWJAP=\"eggplanet 2\",\"\"");
 }
 
 int main()
