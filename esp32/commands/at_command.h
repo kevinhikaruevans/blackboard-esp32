@@ -8,11 +8,7 @@
 #include "types.h"
 #include "../types.h"
 
-/**
- * A slow, linear search of ESP32 commands
- */
 struct at_command* esp32_lookup_command(struct esp32state *inst, const char *line);
-
 bool esp32_is_response_end(const char *line);
 void esp32_handle_line(struct esp32state *inst, const char *line);
 void esp32_handle_unexpected(struct esp32state *inst, const char *line);

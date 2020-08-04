@@ -1,11 +1,21 @@
 #include "bq.h"
 
+/**
+ * Initializes a queue to an empty state.
+ * @param bq The buffer queue to initialize
+ */
 void bq_init(BufferQueue *bq) {
 	bq->buffer_index = 0;
 	bq->char_index = 0;
 	bq->queue_buffer_index = BQ_IDX_INACTIVE;
 }
 
+/**
+ * Adds a single character to the queue. CRs and LFs will be treated
+ * as null characters and will shift the buffer queue.
+ * @param bq The target queue
+ * @param c The character to append
+ */
 void bq_putc(BufferQueue *bq, const char c) {
 	if (bq == NULL)
 		return;
@@ -14,13 +24,13 @@ void bq_putc(BufferQueue *bq, const char c) {
         volatile char* dest = &bq->buffers[bq->buffer_index][bq->char_index++];
 
         switch(c) {
-        default:
-            *dest = c;
-            break;
-        case '\r':
-        case '\n':
-            *dest = '\0';
-            break;
+            default:
+                *dest = c;
+                break;
+            case '\r':
+            case '\n':
+                *dest = '\0';
+                break;
         }
 
         if (c == '\n') {
@@ -46,6 +56,11 @@ void bq_putc(BufferQueue *bq, const char c) {
     }
 }
 
+/**
+ * Appends a string to the queue and forces a newline.
+ * @param bq The queue to add to
+ * @param str The string to enqueue
+ */
 void bq_enqueue(BufferQueue *bq, const char *str) {
 	if (bq == NULL || str == NULL) {
 		return;
@@ -81,6 +96,11 @@ void bq_enqueue(BufferQueue *bq, const char *str) {
     }
 }
 
+/**
+ * Dequeues a line from a queue.
+ * @param bq The queue to dequeue from
+ * @returns the next line or NULL if the queue is empty
+ */
 char* bq_dequeue(BufferQueue *bq) {
 	if (bq == NULL) {
 		return NULL;
@@ -106,10 +126,10 @@ char* bq_dequeue(BufferQueue *bq) {
 }
 
 /**
- * Gets the previous line in the buffer.
- *
+ * Gets the previous line in the buffer, sort-of a reverse-`peek()` method.
  * @param bq The buffer to rev-peek on
  * @param buffer The current line, i.e. the line to offset from.
+ * @returns Returns the last line.
  */
 char *bq_prev_buffer(BufferQueue *bq, char *buffer) {
     if (buffer <= bq->buffers[0]) {

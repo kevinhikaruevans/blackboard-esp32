@@ -1,7 +1,8 @@
 #include "esp32.h"
 
 /**
- * Initializes the ESP32 state.
+ * Resets the ESP32 state to an empty one, defaulting to `off'.
+ * @param inst The instance to initialize.
  */
 void esp32_state_init(ESP32 *inst) {
     inst->boot_status        = ESP32_STATUS_OFF;
@@ -14,7 +15,9 @@ void esp32_state_init(ESP32 *inst) {
 }
 
 /**
- * Sets the callback function, for when the ESP32 is fully booted.
+ * Sets the callback function, called when the ESP32 is fully booted.
+ * @param inst The ESP32 state instance
+ * @param on_ready The callback function called when the ESP32 is booted.
  */
 void esp32_set_ready(ESP32 *inst, void (*on_ready)(ESP32 *)) {
     inst->on_ready = on_ready;
@@ -22,6 +25,7 @@ void esp32_set_ready(ESP32 *inst, void (*on_ready)(ESP32 *)) {
 
 /**
  * Called by the ISR when a character is received.
+ * @param inst The ESP32 state instance
  */
 void esp32_char_recv(ESP32 *inst) {
     char c = *((uint32_t *)UART0_FIFO_ADDR);
@@ -41,6 +45,7 @@ void esp32_clear_interrupts() {
 /**
  * Processes the queue
  * TODO rename the function? `run' implies too much, whereas process is more apt?
+ * @param inst The ESP32 state instance
  */
 void esp32_run_queue(ESP32 *inst) {
 	// handle receiving:
@@ -65,8 +70,9 @@ void esp32_run_queue(ESP32 *inst) {
 /**
  * Prints a line to the ESP32 over UART0.
  *
- * @param inst
+ * @param inst The ESP32 state instance
  * @param buffer The buffer to write
+ * @returns The number of bytes transmitted
  */
 int esp32_println(ESP32 *inst, char *buffer) {
     int i = 0;
@@ -89,11 +95,12 @@ int esp32_println(ESP32 *inst, char *buffer) {
         xil_printf("[ ERR] failed to map '%s' to a command!\r\n", buffer);
     }
 
-    return i;
+    return i + 2;
 }
 
 /**
  * Configure and enable the ESP32 module
+ * @param inst The ESP32 state instance
  */
 void esp32_enable_module(ESP32 *inst) {
     // unlock system level control
@@ -122,6 +129,7 @@ void esp32_enable_module(ESP32 *inst) {
 
 /**
  * Configure and enable UART0
+ * @param inst The ESP32 state instance
  */
 void esp32_enable_uart(ESP32 *inst) {
     /*
@@ -133,7 +141,7 @@ void esp32_enable_uart(ESP32 *inst) {
     *(uint32_t *)UART0_CTRL_ADDR = 0b11;
 
     while((*(uint32_t *)UART0_CTRL_ADDR) == 0b11)
-    { /* wait for reset */ }
+    { /* wait for reset, should implement a counter here for a timeout */ }
 
     /**
      * mode
