@@ -1,11 +1,11 @@
 #include "at_callbacks.h"
 
-struct at_command esp32_commands[4] = {
-    {ESP32_AT_AT,  "AT",     "Tests AT Startup", &esp32_callback_at},
-    //{ESP32_AT_RST, "AT+RST", "Restarts the ESP32", &esp32_callback_at},
-    {ESP32_AT_GMR, "AT+GMR", "Checks version information", &esp32_callback_gmr},
-	{ESP32_AT_CWMODE_SET, "AT+CWMODE=", "Sets the mode", &esp32_callback_default},
-	{ESP32_AT_CWJAP_SET, "AT+CWJAP=", "Connects to an AP", &esp32_callback_cwjap_set}
+struct at_command esp32_commands[5] = {
+    { "AT", "Tests AT Startup", &esp32_callback_at },
+    { "AT+GMR", "Checks version information", &esp32_callback_gmr },
+    { "AT+CWMODE=", "Sets the mode", &esp32_callback_default },
+    { "AT+CWJAP=", "Connects to an AP", &esp32_callback_cwjap_set },
+    { "AT+CIPDOMAIN=", "Queries the DNS", &esp32_callback_cipdomain_set }
 };
 
 void esp32_callback_default(struct esp32state *inst, const char *resp) {
@@ -14,6 +14,17 @@ void esp32_callback_default(struct esp32state *inst, const char *resp) {
         xil_printf("[ CB] end default command\r\n");
 
         //xil_printf("prev='%s'\r\n", prev);
+    }
+}
+void esp32_callback_cipdomain_set(struct esp32state *inst, const char *resp) {
+    if (strstr(resp, "+CIPDOMAIN:") == resp) {
+        const char *ip = resp + sizeof("+CIPDOMAIN:") - 1; // hopefully this is optimized out, lol
+        xil_printf("Resolved as '%s'\r\n", ip);
+        memcpy(inst->current_msg->request.ip, ip, strlen(ip));
+    }
+    if (strcmp("OK", resp) == 0 || strcmp("ERROR", resp) == 0) {
+        inst->current_command = NULL;
+        xil_printf("[ CB] end CIPDOMAIN command\r\n");
     }
 }
 void esp32_callback_at(struct esp32state *inst, const char *resp) {
@@ -27,6 +38,7 @@ void esp32_callback_at(struct esp32state *inst, const char *resp) {
 
 void esp32_callback_cwjap_set(struct esp32state *inst, const char *resp) {
     //xil_printf("Hit AT+CWJAP= callback\r\n");
+
 
     if (strcmp("OK", resp) == 0) {
         inst->current_command = NULL;

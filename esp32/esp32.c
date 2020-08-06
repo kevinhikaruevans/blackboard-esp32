@@ -5,10 +5,11 @@
  * @param inst The instance to initialize.
  */
 void esp32_state_init(ESP32 *inst) {
-    inst->boot_status        = ESP32_STATUS_OFF;
-    inst->char_recv          = &esp32_char_recv;
-    inst->on_ready           = NULL;
-    inst->current_command    = NULL;
+    inst->boot_status = ESP32_STATUS_OFF;
+    inst->char_recv = &esp32_char_recv;
+    inst->on_ready = NULL;
+    inst->on_netchange = NULL;
+    inst->current_command = NULL;
 
     bq_init(&inst->rx_queue);
     bq_init(&inst->tx_queue);

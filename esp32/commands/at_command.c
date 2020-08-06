@@ -50,6 +50,7 @@ void esp32_handle_line(ESP32 *inst, const char *line) {
         // ignore empty strings
         return;
     }
+
     if (inst->current_command == NULL) {
         if (inst->boot_status == ESP32_STATUS_READY) {
             esp32_handle_unexpected(inst, line);
