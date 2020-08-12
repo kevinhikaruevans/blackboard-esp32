@@ -6,10 +6,12 @@
 #include "types.h"
 #include "../types.h"
 
-extern struct at_command esp32_commands[5];
+extern struct at_command esp32_commands[7];
 void esp32_callback_default(struct esp32state *inst, const char *resp);
 void esp32_callback_at(struct esp32state *, const char *);
 void esp32_callback_gmr(struct esp32state *, const char *);
 void esp32_callback_cwjap_set(struct esp32state *inst, const char *resp);
 void esp32_callback_cipdomain_set(struct esp32state *inst, const char *resp);
+void esp32_callback_cipstart_set(struct esp32state *inst, const char *resp);
+void esp32_callback_cipmode_set(struct esp32state *inst, const char *resp);
 #endif

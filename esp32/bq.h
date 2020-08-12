@@ -21,7 +21,7 @@ typedef struct bufferqueue {
 
 void bq_init(BufferQueue *);
 void bq_putc(BufferQueue *bq, const char c);
-void bq_enqueue(BufferQueue *bq, const char *str);
+int bq_enqueue(BufferQueue *bq, const char *str);
 char *bq_dequeue(BufferQueue *bq);
 
 #endif

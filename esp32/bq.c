@@ -61,13 +61,14 @@ void bq_putc(BufferQueue *bq, const char c) {
  * @param bq The queue to add to
  * @param str The string to enqueue
  */
-void bq_enqueue(BufferQueue *bq, const char *str) {
+int bq_enqueue(BufferQueue *bq, const char *str) {
 	if (bq == NULL || str == NULL) {
 		return;
 	}
 
 	size_t srclen       = strlen(str) + 1; /* +1 for \0 */
 	volatile char* dest = NULL;
+    int lineLength = -1;
 
 	/**
 	 * TODO
@@ -79,6 +80,7 @@ void bq_enqueue(BufferQueue *bq, const char *str) {
 
         memcpy((void *)dest, str, srclen);
 
+        lineLength = bq->char_index + srclen - 1;
 		bq->char_index = 0;
 		bq->buffer_index++;
 
@@ -89,11 +91,11 @@ void bq_enqueue(BufferQueue *bq, const char *str) {
 		if (bq->queue_buffer_index == BQ_IDX_INACTIVE) {
 			bq->queue_buffer_index = 0;
 		}
-
     } else {
         // TODO handle this later
         xil_printf("[ BQ] overflow!\n\r");
     }
+    return lineLength;
 }
 
 /**

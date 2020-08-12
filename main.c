@@ -9,11 +9,17 @@
 //#include "esp32.h"
 #include "esp32/gic.h"
 #include "esp32/esp32.h"
+#include "esp32/net/http.h"
 #include "sleep.h"
 
 void esp32_ready(ESP32 *inst) {
 	bq_enqueue(&inst->tx_queue, "AT+CWMODE=3");
-	bq_enqueue(&inst->tx_queue, "AT+CWJAP=\"eggplanet 2\",\"\"");
+    bq_enqueue(&inst->tx_queue, "AT+CWJAP=\"dd-wrt\",\"3606922899\"");
+    //bq_enqueue(&inst->tx_queue, "AT+CIPDOMAIN=\"www.khevans.com\"");
+
+    http_create_request(inst, HTTP_GET, "http://direct.khevans.com/test");
+    http_resolve(inst);
+    http_send(inst);
 }
 
 int main()

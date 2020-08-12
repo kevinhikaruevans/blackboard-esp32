@@ -20,7 +20,6 @@
  */
 typedef struct at_command {
     char name[AT_CMD_NAME_SIZE]; /*!< The command itself, e.g. AT or AT+CWJAP */
-    char desc[AT_CMD_DESC_SIZE]; /*!< Probably unneeded, but a basic description of what the command does */
     void (*callback)(ESP32 *, const char *); /*!< The callback function for the command */
 } ESP32_AT_Command;
 
