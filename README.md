@@ -1,5 +1,5 @@
 # blackboard-esp32
-Testing out the on-board ESP32 on the RealDigital Blackboard.
+Testing out the on-board ESP32 on the [RealDigital Blackboard](https://realdigital.org/).
 
 ## Current status
 
@@ -17,3 +17,5 @@ Testing out the on-board ESP32 on the RealDigital Blackboard.
 
 ## Useful Links
 * [ESP32 AT Instruction Set Documentation (pdf)](https://www.espressif.com/sites/default/files/documentation/esp32_at_instruction_set_and_examples_en.pdf)
+* [RealDigital Blackboard Manual](https://www.realdigital.org/doc/9c908d94497abb1eac41175d1ab05b88) (web)
+* [RealDigital Blackboard Rev. B Manual](https://www.realdigital.org/downloads/1a63155aa0d45e6af2d1ca0ea5d1e53a.pdf) (pdf)
