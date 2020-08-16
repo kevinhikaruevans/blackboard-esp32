@@ -50,6 +50,7 @@ void esp32_enable_uart(ESP32 *);
 void esp32_state_init(ESP32 *);
 void esp32_char_recv(ESP32 *inst);
 void esp32_set_ready(ESP32 *inst, void (*on_ready)(ESP32 *));
+void esp32_on_receive(ESP32 *inst, char c);
 
 void esp32_clear_interrupts();
 void esp32_run_queue(ESP32 *inst);

@@ -7,7 +7,7 @@
  * redo the project as C++ and use an unordered_map...
  */
 struct at_command* esp32_lookup_command(ESP32 *inst, const char *line) {
-    const int size = sizeof(esp32_commands) / sizeof(ESP32_AT_Command);
+    const int size = sizeof(esp32_commands) / sizeof(ATCommand);
     char *eq = strchr(line, '=');
 
     if (eq != NULL && *(eq + 1) != '\0') {
@@ -23,7 +23,7 @@ struct at_command* esp32_lookup_command(ESP32 *inst, const char *line) {
     }
 
     for(int i = 0; i < size; i++) {
-        ESP32_AT_Command *cmd = &esp32_commands[i];
+        ATCommand *cmd = &esp32_commands[i];
 
         if (strcmp(cmd->name, line) == 0) {
             return cmd;
@@ -50,10 +50,17 @@ void esp32_handle_line(ESP32 *inst, const char *line) {
         // ignore empty strings
         return;
     }
+    //xil_printf(">> %s\r\n", line);
 
     if (inst->current_command == NULL) {
         if (inst->boot_status == ESP32_STATUS_READY) {
-            esp32_handle_unexpected(inst, line);
+            if (strstr(line, "+IPD") == line) {
+                //esp32_handle_socket_recv(inst, line);
+                //esp32_handle_ipd(inst, line);
+
+            } else {
+                esp32_handle_unexpected(inst, line);
+            }
         }
         else {
             xil_printf("[BOOT] '%s'\r\n", line);
@@ -70,9 +77,67 @@ void esp32_handle_line(ESP32 *inst, const char *line) {
         }
     } else {
         xil_printf("[RECV] (cb:%s) '%s'\r\n", inst->current_command->name, line);
-        inst->current_command->callback(inst, line);
+        ATCommandStatus status = inst->current_command->callback(inst, line);
+
+        switch (status) {
+            default:
+                case COMMAND_DONE:
+                /* unset the current command if it's done */
+                inst->current_command = NULL;
+                break;
+
+            case COMMAND_WAITING:
+                /* do nothing if it's still waiting */
+                break;
+        }
     }
 }
+
+void esp32_handle_ipd(struct esp32state *inst, const char *line) {
+    //receivedBytesRemaining
+    char *token = strtok(line, ",");
+    int linkId = atoi(strtok(NULL, ","));
+    int length = atoi(strtok(NULL, ":"));
+
+    xil_printf("[ IPD] socket data received, link: %d, length: %d\r\n", linkId, length);
+    struct at_socket * socket = &inst->sockets[linkId];
+
+    // TODO: handle this more elegantly, prob by capturing this in the ISR
+    // copy beginning bits
+    //char *begin = strtok(NULL, "\0");
+    //int beginLength = strlen(begin);
+
+    //memcpy(socket->buffer, begin, beginLength);
+    // this is shit
+    //socket->buffer[beginLength] = '\r';
+    //socket->buffer[beginLength + 1] = '\n';
+
+    //socket->buffer_size = beginLength + 2;
+    socket->receivedBytesRemaining = length;
+
+    inst->active_socket = socket;
+    esp32_set_receive(inst, &esp32_handle_socket_recv);
+}
+
+void esp32_handle_socket_recv(struct esp32state *inst, char c) {
+    /* +IPD,<link_id>,<len> */
+    struct at_socket * socket = inst->active_socket;
+
+    socket->buffer[socket->buffer_size++] = c;
+    //TODO check for overflow
+
+    if (--socket->receivedBytesRemaining == 0) {
+        socket->buffer[socket->buffer_size] = '\0';
+        esp32_set_receive(inst, &esp32_on_receive);
+
+        //xil_printf("received all data: %s\r\n", socket->buffer);
+
+    } else if (socket->receivedBytesRemaining < 50) {
+        //xil_printf("%d.", socket->receivedBytesRemaining);
+    }
+
+}
+
 
 /**
  * A function to handle an unexpected command response

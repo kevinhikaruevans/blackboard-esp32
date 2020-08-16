@@ -7,6 +7,7 @@
 void esp32_state_init(ESP32 *inst) {
     inst->boot_status = ESP32_STATUS_OFF;
     inst->char_recv = &esp32_char_recv;
+    inst->on_receive = &esp32_on_receive;
     inst->on_ready = NULL;
     inst->on_netchange = NULL;
     inst->current_command = NULL;
@@ -24,6 +25,10 @@ void esp32_set_ready(ESP32 *inst, void (*on_ready)(ESP32 *)) {
     inst->on_ready = on_ready;
 }
 
+void esp32_set_receive(ESP32 *inst, void (*on_receive)(ESP32 *, char)) {
+    inst->on_receive = on_receive;
+}
+
 /**
  * Called by the ISR when a character is received.
  * @param inst The ESP32 state instance
@@ -31,11 +36,21 @@ void esp32_set_ready(ESP32 *inst, void (*on_ready)(ESP32 *)) {
 void esp32_char_recv(ESP32 *inst) {
     char c = *((uint32_t *)UART0_FIFO_ADDR);
 
-    bq_putc(&inst->rx_queue, c);
+    //esp32_on_receive(inst, c);
+    inst->on_receive(inst, c);
 
     esp32_clear_interrupts();
 }
 
+void esp32_on_receive(ESP32 *inst, char c) {
+    char *line = bq_putc(&inst->rx_queue, c);
+
+    if (line != NULL && strstr(line, "+IPD") == line) {
+        esp32_handle_ipd(inst, line);
+    }
+
+
+}
 /**
  * Clears ALL interrupts (on UART0)
  */
@@ -66,6 +81,18 @@ void esp32_run_queue(ESP32 *inst) {
 			esp32_println(inst, line);
 		}
 	}
+
+    // handle active socket:
+    if (inst->active_socket != NULL) {
+        if (inst->active_socket->receivedBytesRemaining == 0) {
+            // done receiving, remove from being the active socket and call a receive() function
+            if (inst->active_socket->on_receive != NULL) {
+                inst->active_socket->on_receive(inst, inst->active_socket);
+            }
+
+            inst->active_socket = NULL;
+        }
+    }
 }
 
 /**
@@ -90,10 +117,16 @@ int esp32_println(ESP32 *inst, char *buffer) {
     // TODO: swap out the Xilinx functions and just write to the TX FIFO addr
     XUartPs_SendByte(UART0_CTRL_ADDR, '\r');
     XUartPs_SendByte(UART0_CTRL_ADDR, '\n');
-    inst->current_command = esp32_lookup_command(inst, buffer);
 
     if (inst->current_command == NULL) {
-        xil_printf("[ ERR] failed to map '%s' to a command!\r\n", buffer);
+        inst->current_command = esp32_lookup_command(inst, buffer);
+
+        if (inst->current_command == NULL) {
+            xil_printf("[ ERR] failed to map '%s' to a command!\r\n", buffer);
+        }
+    } else {
+        xil_printf("[ ERR] attempt to write over current_command with '%s'\r\n", buffer);
+        xil_printf("[ ERR] +-> current command = %s\r\n", inst->current_command->name);
     }
 
     return i + 2;

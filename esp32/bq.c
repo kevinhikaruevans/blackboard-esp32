@@ -15,22 +15,32 @@ void bq_init(BufferQueue *bq) {
  * as null characters and will shift the buffer queue.
  * @param bq The target queue
  * @param c The character to append
+ * @returns a non-NULL value if the command requires immediate processing.
  */
-void bq_putc(BufferQueue *bq, const char c) {
+char * bq_putc(BufferQueue *bq, char c) {
+    char *ret = NULL;
+
 	if (bq == NULL)
-		return;
+        return ret;
 
     if (bq->char_index < BQ_BUFFER_SIZE - 1) {
+        char *line = bq->buffers[bq->buffer_index];
         volatile char* dest = &bq->buffers[bq->buffer_index][bq->char_index++];
 
         switch(c) {
             default:
                 *dest = c;
                 break;
-            case '\r':
+            case '\r': // eh
             case '\n':
                 *dest = '\0';
                 break;
+        }
+
+        if (c == ':' && strstr(line, "+IPD") == line) {
+            *dest = '\0';
+            c = '\n';
+            ret = line;
         }
 
         if (c == '\n') {
@@ -52,8 +62,10 @@ void bq_putc(BufferQueue *bq, const char c) {
         }
     } else {
         // TODO handle this later
-        xil_printf("[ BQ] overflow!\n\r");
+        xil_printf("[ BQ] putc overflow!\n\r");
     }
+
+    return ret;
 }
 
 /**
@@ -61,42 +73,42 @@ void bq_putc(BufferQueue *bq, const char c) {
  * @param bq The queue to add to
  * @param str The string to enqueue
  */
-int bq_enqueue(BufferQueue *bq, const char *str) {
-	if (bq == NULL || str == NULL) {
-		return;
-	}
+void bq_enqueue(BufferQueue *bq, const char *str) {
+    if (bq == NULL || str == NULL) {
+        return;
+    }
 
-	size_t srclen       = strlen(str) + 1; /* +1 for \0 */
-	volatile char* dest = NULL;
-    int lineLength = -1;
+    size_t srclen = strlen(str) + 1; /* +1 for \0 */
+    volatile char* dest = NULL;
 
-	/**
-	 * TODO
-	 * 1. consider whether or not to start at char_index or just to start at 0
-	 * 2. test out the limits and actually ensure it's within bounds
-	 */
+    /**
+     * TODO
+     * 1. consider whether or not to start at char_index or just to start at 0
+     * 2. test out the limits and actually ensure it's within bounds
+     */
     if ((bq->char_index + srclen) < BQ_BUFFER_SIZE - 1) {
         dest = &bq->buffers[bq->buffer_index][bq->char_index];
 
         memcpy((void *)dest, str, srclen);
 
-        lineLength = bq->char_index + srclen - 1;
-		bq->char_index = 0;
-		bq->buffer_index++;
+        bq->char_index = 0;
+        bq->buffer_index++;
 
-		if (bq->buffer_index >= BQ_SCROLLBACK_SIZE) {
-			bq->buffer_index = 0;
-		}
+        if (bq->buffer_index >= BQ_SCROLLBACK_SIZE) {
+            bq->buffer_index = 0;
+        }
 
-		if (bq->queue_buffer_index == BQ_IDX_INACTIVE) {
-			bq->queue_buffer_index = 0;
-		}
+        if (bq->queue_buffer_index == BQ_IDX_INACTIVE) {
+            bq->queue_buffer_index = 0;
+        }
+
     } else {
         // TODO handle this later
-        xil_printf("[ BQ] overflow!\n\r");
+        xil_printf("[ BQ] enqueue overflow!\r\n");
+        xil_printf("[ BQ] overflow data: [[%s]]\r\n", str);
     }
-    return lineLength;
 }
+
 
 /**
  * Dequeues a line from a queue.
@@ -104,9 +116,9 @@ int bq_enqueue(BufferQueue *bq, const char *str) {
  * @returns the next line or NULL if the queue is empty
  */
 char* bq_dequeue(BufferQueue *bq) {
-	if (bq == NULL) {
-		return NULL;
-	}
+    if (bq == NULL) {
+        return NULL;
+    }
 
     if (bq->queue_buffer_index == BQ_IDX_INACTIVE) {
         // no data has been received yet

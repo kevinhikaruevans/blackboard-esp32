@@ -15,12 +15,17 @@
  * - DUNNO
  */
 
+typedef enum at_command_status {
+    COMMAND_WAITING,
+    COMMAND_DONE
+} ATCommandStatus;
+
 /**
  * Container for commands and their associated callback functions
  */
 typedef struct at_command {
     char name[AT_CMD_NAME_SIZE]; /*!< The command itself, e.g. AT or AT+CWJAP */
-    void (*callback)(ESP32 *, const char *); /*!< The callback function for the command */
-} ESP32_AT_Command;
+    ATCommandStatus (*callback)(ESP32 *, const char *); /*!< The callback function for the command */
+} ATCommand;
 
 #endif

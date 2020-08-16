@@ -27,7 +27,15 @@ typedef struct esp32state {
         char psk[32];
     } wifi_state;
 
+    struct at_socket sockets[5];
+
+    struct at_socket *active_socket;
+
     void (*char_recv)(struct esp32state *); /*!< function called when a char has been received */
+
+    void (*on_receive)(struct esp32state *, char);
+
+    //void (*line_recv)(struct esp32state *);
 
     void (*on_ready)(struct esp32state *); /*!< function called when the esp32 has booted */
 
@@ -36,6 +44,9 @@ typedef struct esp32state {
     struct at_command *current_command; /*!< the current/last command sent or NULL if the esp32 is not busy */
 
     struct http_message *current_msg; /*!< the current/last http msg or NULL if there is none */
+
+
+
 } ESP32;
 
 

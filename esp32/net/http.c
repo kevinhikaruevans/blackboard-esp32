@@ -29,6 +29,7 @@ void http_create_request(ESP32 *inst, HttpMethod method, char *url) {
     memcpy(&msg->request.domain, domain, strlen(domain) + 1);
     msg->request.port = 80;
     msg->request.uri[0] = '/';
+
     if (uri != NULL) {
         memcpy(&msg->request.uri + 1, uri, strlen(uri) + 1);
     }
@@ -59,7 +60,7 @@ void http_send(ESP32 *inst) {
     bq_enqueue(&inst->tx_queue, buffer);
     bq_enqueue(&inst->tx_queue, "AT+CIPMODE=0");
 
-    int length = sprintf(largeBuffer, "%s %s HTTP/1.1\r\nUser-Agent: ESP32\r\nHost: %s\r\n",
+    int length = sprintf(largeBuffer, "%s %s HTTP/1.1\r\nUser-Agent: ESP32\r\nHost: %s\r\n\r\n",
             HTTP_METHODS[msg->request.method],
             msg->request.uri,
             msg->request.domain);
@@ -67,6 +68,8 @@ void http_send(ESP32 *inst) {
     sprintf(buffer, "AT+CIPSEND=%d", length);
     bq_enqueue(&inst->tx_queue, buffer);
     bq_enqueue(&inst->tx_queue, largeBuffer); // will exceed buffer length. will need to do a raw send
-    bq_enqueue(&inst->tx_queue, "AT+CIPCLOSE");
+    //bq_enqueue(&inst->tx_queue, "AT+CIPCLOSE");
     //bq_enqueue(&inst->tx_queue, "AT+CIPSEND=")
 }
+
+void http_recv();
