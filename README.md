@@ -9,9 +9,10 @@ Testing out the on-board ESP32 on the [RealDigital Blackboard](https://realdigit
 | UART interrupts for receiving data      | Done        |
 | Simple Tx/Rx queues                     | Done        |
 | Wifi connectivity                       | Done        |
-| Socket wrapper                          | In progress |
-| TCP socket                              | In progress |
-| HTTP wrapper                            | In progress |
+| Socket wrapper                          | Done        |
+| TCP socket                              | Done        |
+| HTTP wrapper                            | Done        |
+| Socket & HTTP refactoring               | In progress |
 | UDP and SSL                             | Not started |
 | Documentation                           | Not started |
 
