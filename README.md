@@ -1,5 +1,8 @@
 # blackboard-esp32
-Testing out the on-board ESP32 on the [RealDigital Blackboard](https://realdigital.org/).
+Connect to the on-board ESP32 on the [RealDigital Blackboard](https://realdigital.org/).
+
+:radioactive:  **Note:** This is only tested on the Rev. B board.
+
 
 ## Current status
 
