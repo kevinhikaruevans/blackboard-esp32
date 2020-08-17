@@ -5,6 +5,7 @@
 #include "./types.h"
 #include "./socket.h"
 #include <stdio.h>
+#include <stdlib.h>
 
 void http_create_request(struct esp32state *inst, struct http_message *msg, HttpMethod method, char *url);
 void http_execute(struct esp32state *inst, struct http_message *msg);

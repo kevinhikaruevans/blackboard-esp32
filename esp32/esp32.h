@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <string.h>
 
 #include "xil_printf.h"
 #include "xuartps_hw.h"
@@ -55,5 +56,8 @@ void esp32_on_receive(ESP32 *inst, char c);
 void esp32_clear_interrupts();
 void esp32_run_queue(ESP32 *inst);
 int esp32_println(ESP32 *inst, char *buffer);
+
+void esp32_handle_ipd(struct esp32state *inst, const char *line);
+void esp32_handle_socket_recv(struct esp32state *inst, char c);
 
 #endif

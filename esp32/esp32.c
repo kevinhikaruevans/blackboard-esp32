@@ -202,3 +202,36 @@ void esp32_enable_uart(ESP32 *inst) {
     //UART0_IDR = 1;
 }
 
+void esp32_handle_ipd(struct esp32state *inst, const char *line) {
+    /* +IPD,<link_id>,<len> */
+    strtok(line, ",");
+    int linkId = atoi(strtok(NULL, ","));
+    int length = atoi(strtok(NULL, ":"));
+
+    xil_printf("[ IPD] socket data received, link: %d, length: %d\r\n", linkId, length);
+    struct at_socket * socket = &inst->sockets[linkId];
+
+    socket->receivedBytesRemaining = length;
+
+    inst->active_socket = socket;
+    esp32_set_receive(inst, &esp32_handle_socket_recv);
+}
+
+void esp32_handle_socket_recv(struct esp32state *inst, char c) {
+    struct at_socket * socket = inst->active_socket;
+
+    socket->buffer[socket->buffer_size++] = c;
+
+    //TODO check for overflow
+    if (--socket->receivedBytesRemaining == 0) {
+        socket->buffer[socket->buffer_size] = '\0';
+        esp32_set_receive(inst, &esp32_on_receive);
+
+        //xil_printf("received all data: %s\r\n", socket->buffer);
+
+    } else if (socket->receivedBytesRemaining < 50) {
+        //xil_printf("%d.", socket->receivedBytesRemaining);
+    }
+
+}
+

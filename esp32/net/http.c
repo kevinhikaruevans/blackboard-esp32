@@ -59,28 +59,39 @@ void http_execute(struct esp32state *inst, struct http_message *msg) {
 
 void http_on_receive(struct esp32state *inst, struct at_socket *socket) {
     socket_close(inst, socket);
+
     struct http_message * msg = (struct http_message *) socket->parent;
     char *line = strtok(socket->buffer, "\n");
 
-    // parse status
-    msg->response.response_code = atoi(line + sizeof("HTTP/1.1 ")); // eh
+    // hopefully optimized out:
+    char *responseCode = line + sizeof("HTTP/1.1");
+    responseCode[3] = '\0';
+
+    msg->response.response_code = atoi(responseCode);
 
     line = strtok(NULL, "\n");
     int headerIndex = 0;
 
     while (line != NULL) {
-        if (strlen(line) <= 1)
-            break;
         int headerLineLength = strlen(line);
-        if (line[headerLineLength - 1] == '\r')
-            line[headerLineLength - 1] = '\0';
 
-        memcpy(&msg->response.headers[headerIndex++], line, headerLineLength + 1);
+        // just break if it's hit the \r\n\r\n:
+        if (headerLineLength <= 1)
+            break;
+
+        if (headerIndex < 8) {
+            if (line[headerLineLength - 1] == '\r')
+                line[headerLineLength - 1] = '\0';
+
+            memcpy(&msg->response.headers[headerIndex++], line, headerLineLength + 1);
+        }
 
         line = strtok(NULL, "\n");
     }
+
+    msg->response.headers[headerIndex][0] = '\0';
     msg->response.body = strtok(NULL, "\0");
-    //TODO parse this yo
+
     if (msg->on_success != NULL) {
         msg->on_success(inst, msg);
     }
