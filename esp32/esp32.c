@@ -14,6 +14,8 @@ void esp32_state_init(ESP32 *inst) {
 
     bq_init(&inst->rx_queue);
     bq_init(&inst->tx_queue);
+
+    wifi_init(inst);
 }
 
 /**

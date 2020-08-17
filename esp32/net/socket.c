@@ -19,6 +19,7 @@ void socket_init(
     sock->link_id = 1; // TODO: round robin
     sock->buffer_size = 0;
     sock->receivedBytesRemaining = 0;
+    sock->parent = NULL;
 }
 
 void socket_open(ESP32 *inst, struct at_socket *sock) {

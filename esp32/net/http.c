@@ -1,11 +1,6 @@
 #include "http.h"
 
-void http_init(HttpMessage *msg) {
-
-}
-
-void http_create_request(ESP32 *inst, HttpMethod method, char *url) {
-    HttpMessage *msg = inst->current_msg;
+void http_create_request(struct esp32state *inst, struct http_message *msg, HttpMethod method, char *url) {
     char *protocol = strtok(url, "://");
     char *domain = strtok(NULL, "/");
     char *uri = strtok(NULL, "\0");
@@ -25,51 +20,68 @@ void http_create_request(ESP32 *inst, HttpMethod method, char *url) {
         return;
     }
 
+    msg->socket = &inst->sockets[1];
+
+    socket_init(inst, msg->socket, SOCKET_TCP, domain, 80);
+
+    msg->socket->parent = (void *) msg;
+
     // could probably use ptr arith instead of strlen here
-    memcpy(&msg->request.domain, domain, strlen(domain) + 1);
-    msg->request.port = 80;
+    //memcpy(&msg->request.domain, domain, strlen(domain) + 1);
+    //msg->request.port = 80; //TODO
     msg->request.uri[0] = '/';
+    msg->request.uri[1] = '\0';
 
     if (uri != NULL) {
-        memcpy(&msg->request.uri + 1, uri, strlen(uri) + 1);
+        memcpy(&msg->request.uri[1], uri, strlen(uri) + 1);
     }
+
     msg->request.method = method;
     msg->request.headers[0][0] = '\0';
-    msg->request.cip_started = false;
+    msg->on_success = NULL;
 }
 
-void http_resolve(ESP32 *inst) {
-    char command[64];
-    sprintf(command, "AT+CIPDOMAIN=\"%s\"", inst->current_msg->request.domain);
-    bq_enqueue(&inst->tx_queue, command);
-}
-
-void http_send(ESP32 *inst) {
-    /*
-     * AT+CIPSTART
-     * AT+CIPMODE
-     * AT+CIPSEND
-     * AT+CIPCLOSE
-     */
-    HttpMessage *msg = inst->current_msg;
-    char buffer[64];
-    char largeBuffer[256];
-
-    sprintf(buffer, "AT+CIPSTART=\"TCP\",\"%s\",%d", /*msg->request.ip*/msg->request.domain, msg->request.port);
-
-    bq_enqueue(&inst->tx_queue, buffer);
-    bq_enqueue(&inst->tx_queue, "AT+CIPMODE=0");
-
-    int length = sprintf(largeBuffer, "%s %s HTTP/1.1\r\nUser-Agent: ESP32\r\nHost: %s\r\n\r\n",
+void http_execute(struct esp32state *inst, struct http_message *msg) {
+    char buffer[256];
+    socket_set_receive(msg->socket, &http_on_receive);
+    socket_open(inst, msg->socket);
+    //TODO: add headers
+    int length = sprintf(buffer,
+            "%s %s HTTP/1.1\r\n"
+                    "Host: %s\r\n"
+                    "User-Agent: blackboard-esp32\r\n"
+                    "\r\n",
             HTTP_METHODS[msg->request.method],
             msg->request.uri,
-            msg->request.domain);
-
-    sprintf(buffer, "AT+CIPSEND=%d", length);
-    bq_enqueue(&inst->tx_queue, buffer);
-    bq_enqueue(&inst->tx_queue, largeBuffer); // will exceed buffer length. will need to do a raw send
-    //bq_enqueue(&inst->tx_queue, "AT+CIPCLOSE");
-    //bq_enqueue(&inst->tx_queue, "AT+CIPSEND=")
+            msg->socket->host);
+    socket_send(inst, msg->socket, buffer, length);
 }
 
-void http_recv();
+void http_on_receive(struct esp32state *inst, struct at_socket *socket) {
+    socket_close(inst, socket);
+    struct http_message * msg = (struct http_message *) socket->parent;
+    char *line = strtok(socket->buffer, "\n");
+
+    // parse status
+    msg->response.response_code = atoi(line + sizeof("HTTP/1.1 ")); // eh
+
+    line = strtok(NULL, "\n");
+    int headerIndex = 0;
+
+    while (line != NULL) {
+        if (strlen(line) <= 1)
+            break;
+        int headerLineLength = strlen(line);
+        if (line[headerLineLength - 1] == '\r')
+            line[headerLineLength - 1] = '\0';
+
+        memcpy(&msg->response.headers[headerIndex++], line, headerLineLength + 1);
+
+        line = strtok(NULL, "\n");
+    }
+    msg->response.body = strtok(NULL, "\0");
+    //TODO parse this yo
+    if (msg->on_success != NULL) {
+        msg->on_success(inst, msg);
+    }
+}

@@ -25,6 +25,8 @@ typedef struct esp32state {
 
         char ssid[32];
         char psk[32];
+
+        void (*on_connect)(struct esp32state *);
     } wifi_state;
 
     struct at_socket sockets[5];

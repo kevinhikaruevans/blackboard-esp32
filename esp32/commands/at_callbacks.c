@@ -40,7 +40,7 @@ ATCommandStatus esp32_callback_cipsend_set(struct esp32state *inst, const char *
 
 ATCommandStatus esp32_callback_cipstart_set(struct esp32state *inst, const char *resp) {
     if (strcmp("OK", resp) == 0 || strcmp("ERROR", resp) == 0) {
-        inst->current_msg->request.cip_started = true;
+        //inst->current_msg->request.cip_started = true;
 
         return COMMAND_DONE;
     }
@@ -56,7 +56,7 @@ ATCommandStatus esp32_callback_cipdomain_set(struct esp32state *inst, const char
     if (strstr(resp, "+CIPDOMAIN:") == resp) {
         const char *ip = resp + sizeof("+CIPDOMAIN:") - 1; // hopefully this is optimized out, lol
         xil_printf("Resolved as '%s'\r\n", ip);
-        memcpy(inst->current_msg->request.ip, ip, strlen(ip));
+        //memcpy(inst->current_msg->request.ip, ip, strlen(ip));
     }
 
     return COMMAND_WAITING;
@@ -73,6 +73,13 @@ ATCommandStatus esp32_callback_at(struct esp32state *inst, const char *resp) {
 }
 
 ATCommandStatus esp32_callback_cwjap_set(struct esp32state *inst, const char *resp) {
+    if (strcmp("WIFI GOT IP", resp) == 0) {
+        inst->wifi_state.wifi_status = WIFI_CONNECTED;
+
+        if (inst->wifi_state.on_connect != NULL) {
+            inst->wifi_state.on_connect(inst);
+        }
+    }
     return esp32_callback_default(inst, resp);
 }
 

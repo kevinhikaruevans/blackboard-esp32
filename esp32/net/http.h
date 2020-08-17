@@ -1,13 +1,14 @@
 #ifndef ESP32_NET_HTTP_H
 #define ESP32_NET_HTTP_H
 
-#include <stdio.h>
-#include "types.h"
 #include "../types.h"
+#include "./types.h"
+#include "./socket.h"
+#include <stdio.h>
 
-void http_init(HttpMessage *);
-void http_create_request(ESP32 *, const HttpMethod, char *url);
-void http_resolve(ESP32 *);
-void http_send(ESP32 *);
+void http_create_request(struct esp32state *inst, struct http_message *msg, HttpMethod method, char *url);
+void http_execute(struct esp32state *inst, struct http_message *msg);
+void http_on_receive(struct esp32state *inst, struct at_socket *socket);
+
 
 #endif
