@@ -5,15 +5,33 @@
 #include "xil_io.h"
 #include "xil_exception.h"
 #include "xscugic.h"
-
-//#include "esp32.h"
 #include "esp32/gic.h"
 #include "esp32/esp32.h"
+#include "esp32/net/http.h"
+#include "esp32/net/wifi.h"
 #include "sleep.h"
 
+#include "esp32/net/socket.h"
+
+
+
+void on_success(struct esp32state *inst, struct http_message *client) {
+    xil_printf("Received data: '%s'\r\n", client->response.body);
+}
+
+static struct http_message msg;
+
+void on_connect(struct esp32state *inst) {
+    http_create_request(inst, &msg, HTTP_GET, "http://worldtimeapi.org/api/ip.txt");
+    msg.on_success = &on_success;
+    http_execute(inst, &msg);
+}
+
+
 void esp32_ready(ESP32 *inst) {
-	bq_enqueue(&inst->tx_queue, "AT+CWMODE=3");
-	bq_enqueue(&inst->tx_queue, "AT+CWJAP=\"eggplanet 2\",\"\"");
+    inst->wifi_state.on_connect = &on_connect;
+    wifi_connect(inst, "dd-wrt", "");
+
 }
 
 int main()

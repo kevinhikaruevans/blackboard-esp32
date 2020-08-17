@@ -7,6 +7,9 @@
 #include "at_callbacks.h"
 #include "types.h"
 #include "../types.h"
+#include <stdbool.h>
+#include "../esp32.h"
+#include <stdio.h>
 
 struct at_command* esp32_lookup_command(struct esp32state *inst, const char *line);
 bool esp32_is_response_end(const char *line);

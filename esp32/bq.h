@@ -20,7 +20,7 @@ typedef struct bufferqueue {
 } BufferQueue;
 
 void bq_init(BufferQueue *);
-void bq_putc(BufferQueue *bq, const char c);
+char * bq_putc(BufferQueue *bq, char c);
 void bq_enqueue(BufferQueue *bq, const char *str);
 char *bq_dequeue(BufferQueue *bq);
 
