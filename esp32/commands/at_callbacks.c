@@ -1,6 +1,6 @@
 #include "at_callbacks.h"
 
-struct at_command esp32_commands[9] = {
+struct at_command esp32_commands[10] = {
     { "AT", &esp32_callback_at },
     { "AT+GMR", &esp32_callback_gmr },
     { "AT+CWMODE=", &esp32_callback_default },
@@ -9,7 +9,8 @@ struct at_command esp32_commands[9] = {
     { "AT+CIPSTART=", &esp32_callback_cipstart_set },
     { "AT+CIPMODE=", &esp32_callback_default },
     { "AT+CIPSEND=", &esp32_callback_cipsend_set },
-    { "AT+CIPMUX=", &esp32_callback_default }
+    { "AT+CIPMUX=", &esp32_callback_default },
+    { "AT+CIPCLOSE=", &esp32_callback_default }
 };
 
 ATCommandStatus esp32_callback_default(struct esp32state *inst, const char *resp) {
@@ -26,6 +27,17 @@ ATCommandStatus esp32_callback_cipmode_set(struct esp32state *inst, const char *
 }
 
 ATCommandStatus esp32_callback_cipsend_set(struct esp32state *inst, const char *resp) {
+    //return COMMAND_DONE;
+    if (strcmp("OK", resp) == 0) {
+        inst->is_raw_transmit = true;
+        return COMMAND_WAITING;
+    }
+    if (strcmp("SEND OK", resp) == 0 || strcmp("SEND FAIL", resp) == 0) {
+        inst->is_raw_transmit = false;
+        return COMMAND_DONE;
+    }
+
+    return COMMAND_WAITING;
     //return esp32_callback_default(inst, resp);
     /*if (strcmp("SEND OK", resp) == 0
             || strcmp("ERROR", resp) == 0
@@ -79,6 +91,19 @@ ATCommandStatus esp32_callback_cwjap_set(struct esp32state *inst, const char *re
         if (inst->wifi_state.on_connect != NULL) {
             inst->wifi_state.on_connect(inst);
         }
+    }
+
+    /* could catch ERROR here and find the prev line, or just parse +CWJAP */
+
+    if (strstr(resp, "+CWJAP:") == resp) {
+        int errorCode = atoi(resp + sizeof("+CWJAP:") - 1);
+
+        /* I don't like this and might change it later */
+        if (inst->on_error) {
+            inst->on_error(inst, ESP32_WIFI, errorCode);
+        }
+
+        inst->wifi_state.wifi_status = WIFI_DISCONNECTED;
     }
     return esp32_callback_default(inst, resp);
 }

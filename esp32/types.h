@@ -4,6 +4,10 @@
 #include "bq.h"
 #include "net/types.h"
 
+enum esp32_subsystem {
+    ESP32_GLOBAL,
+    ESP32_WIFI
+};
 /**
  * A container to hold the state of the ESP32 and
  * the associated callback functions.
@@ -33,9 +37,13 @@ typedef struct esp32state {
 
     struct at_socket *active_socket;
 
+    bool is_raw_transmit; /*!< need to rename this, but true if we're doing a raw (non-command) send */
+
     void (*char_recv)(struct esp32state *); /*!< function called when a char has been received */
 
     void (*on_receive)(struct esp32state *, char);
+
+    void (*on_error)(struct esp32state *, enum esp32_subsystem, int);
 
     //void (*line_recv)(struct esp32state *);
 
