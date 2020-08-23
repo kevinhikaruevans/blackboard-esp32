@@ -16,6 +16,8 @@ Connect to the on-board ESP32 on the [RealDigital Blackboard](https://realdigita
 | TCP socket                              | Done        |
 | HTTP wrapper                            | Done        |
 | Socket & HTTP refactoring               | In progress |
+| Wifi AP mode                            | Not started |
+| Bluetooth                               | Not started |
 | UDP and SSL                             | Not started |
 | Documentation                           | Not started |
 
