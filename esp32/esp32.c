@@ -9,8 +9,11 @@ void esp32_state_init(ESP32 *inst) {
     inst->char_recv = &esp32_char_recv;
     inst->on_receive = &esp32_on_receive;
     inst->on_ready = NULL;
+    inst->on_error = NULL;
     inst->on_netchange = NULL;
     inst->current_command = NULL;
+    inst->active_socket = NULL;
+    inst->is_raw_transmit = false;
 
     bq_init(&inst->rx_queue);
     bq_init(&inst->tx_queue);
@@ -74,9 +77,8 @@ void esp32_run_queue(ESP32 *inst) {
 	}
 
 	// handle transmitting:
-	if (inst->current_command == NULL) {
+    if (inst->current_command == NULL || inst->is_raw_transmit) {
 		// only transmit when there's not a command waiting
-
 		line = bq_dequeue(&inst->tx_queue);
 
 		if (line != NULL) {
@@ -120,17 +122,20 @@ int esp32_println(ESP32 *inst, char *buffer) {
     XUartPs_SendByte(UART0_CTRL_ADDR, '\r');
     XUartPs_SendByte(UART0_CTRL_ADDR, '\n');
 
-    if (inst->current_command == NULL) {
-        inst->current_command = esp32_lookup_command(inst, buffer);
-
-        if (inst->current_command == NULL) {
-            xil_printf("[ ERR] failed to map '%s' to a command!\r\n", buffer);
-        }
+    if (inst->is_raw_transmit) {
+        xil_printf("[ TX] raw send, length %d\r\n", length);
     } else {
-        xil_printf("[ ERR] attempt to write over current_command with '%s'\r\n", buffer);
-        xil_printf("[ ERR] +-> current command = %s\r\n", inst->current_command->name);
-    }
+        if (inst->current_command == NULL) {
+            inst->current_command = esp32_lookup_command(inst, buffer);
 
+            if (inst->current_command == NULL) {
+                xil_printf("[ ERR] failed to map '%s' to a command!\r\n", buffer);
+            }
+        } else {
+            xil_printf("[ ERR] attempt to write over current_command with '%s'\r\n", buffer);
+            xil_printf("[ ERR] +-> current command = %s\r\n", inst->current_command->name);
+        }
+    }
     return i + 2;
 }
 
