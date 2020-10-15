@@ -1,7 +1,7 @@
 # blackboard-esp32
 Connect to the on-board ESP32 on the [RealDigital Blackboard](https://realdigital.org/).
 
-:radioactive:  **Note:** This is only tested on the Rev. B board.
+:radioactive:  **Note:** This is only tested on the Rev. B board. Feel free to email me if you're interested in the project and I can add you as a maintainer, or you can just encourage me to work on this. 
 
 
 ## Current status
