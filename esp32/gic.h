@@ -18,7 +18,7 @@
 
 void arm_disable_irq();
 void arm_enable_irq();
-void esp32_interrupts_config(ESP32 *);
+void esp32_interrupts_config(struct esp32state *);
 void irq_handler();
 
 #endif

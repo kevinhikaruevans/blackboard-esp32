@@ -12,7 +12,7 @@ enum esp32_subsystem {
  * A container to hold the state of the ESP32 and
  * the associated callback functions.
  */
-typedef struct esp32state {
+struct esp32state {
     BufferQueue rx_queue; /*!< queue for data received */
     BufferQueue tx_queue; /*!< queue for commands to send */
 
@@ -57,7 +57,7 @@ typedef struct esp32state {
 
 
 
-} ESP32;
+};
 
 
 

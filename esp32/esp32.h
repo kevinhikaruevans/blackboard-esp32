@@ -46,16 +46,16 @@
 #define GPIO_OEN(n)            *(((uint32_t*) 0xE000A208) + 16*n)
 
 
-void esp32_enable_module(ESP32 *);
-void esp32_enable_uart(ESP32 *);
-void esp32_state_init(ESP32 *);
-void esp32_char_recv(ESP32 *inst);
-void esp32_set_ready(ESP32 *inst, void (*on_ready)(ESP32 *));
-void esp32_on_receive(ESP32 *inst, char c);
+void esp32_enable_module(struct esp32state *);
+void esp32_enable_uart(struct esp32state *);
+void esp32_state_init(struct esp32state *);
+void esp32_char_recv(struct esp32state *inst);
+void esp32_set_ready(struct esp32state *inst, void (*on_ready)(struct esp32state *));
+void esp32_on_receive(struct esp32state *inst, char c);
 
 void esp32_clear_interrupts();
-void esp32_run_queue(ESP32 *inst);
-int esp32_println(ESP32 *inst, char *buffer);
+void esp32_run_queue(struct esp32state *inst);
+int esp32_println(struct esp32state *inst, char *buffer);
 
 void esp32_handle_ipd(struct esp32state *inst, const char *line);
 void esp32_handle_socket_recv(struct esp32state *inst, char c);

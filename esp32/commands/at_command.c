@@ -6,7 +6,7 @@
  * IDEALLY: this should be a hashtable but I'm not sure if I should just
  * redo the project as C++ and use an unordered_map...
  */
-struct at_command* esp32_lookup_command(ESP32 *inst, const char *line) {
+struct at_command* esp32_lookup_command(struct esp32state *inst, const char *line) {
     const int size = sizeof(esp32_commands) / sizeof(ATCommand);
     char *eq = strchr(line, '=');
 
@@ -45,7 +45,7 @@ bool esp32_is_response_end(const char *line) {
  * @param inst The ESP32 instance
  * @param line The line received
  */
-void esp32_handle_line(ESP32 *inst, const char *line) {
+void esp32_handle_line(struct esp32state *inst, const char *line) {
     if (line == NULL || line[0] == '\0') {
         // ignore empty strings
         return;

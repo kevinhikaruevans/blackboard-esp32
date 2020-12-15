@@ -41,7 +41,7 @@ void enable_interrupt59()
     ICDISER(1) = (1 << (59 - 32));
 }
 
-void esp32_interrupts_config(ESP32 *instance) {
+void esp32_interrupts_config(struct esp32state *instance) {
     arm_disable_irq();
 
     ICDDCR = 0; // disable GIC distributor
@@ -67,7 +67,7 @@ void irq_handler(void *data) {
     uint32_t interrupt_ID = ICCIAR;
 
     if (interrupt_ID == 59) {
-        ESP32 *inst = data;
+        struct esp32state *inst = data;
         if (data != NULL && inst->char_recv != NULL) {
             inst->char_recv(inst);
         }

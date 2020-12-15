@@ -22,7 +22,7 @@ void socket_init(
     sock->parent = NULL;
 }
 
-void socket_open(ESP32 *inst, struct at_socket *sock) {
+void socket_open(struct esp32state *inst, struct at_socket *sock) {
     char buffer[64];
     sprintf(buffer,
             "AT+CIPSTART=%d,\"%s\",\"%s\",%d",
@@ -34,13 +34,13 @@ void socket_open(ESP32 *inst, struct at_socket *sock) {
     bq_enqueue(&inst->tx_queue, buffer);
 }
 
-void socket_close(ESP32 *inst, struct at_socket *sock) {
+void socket_close(struct esp32state *inst, struct at_socket *sock) {
     char buffer[32];
     sprintf(buffer, "AT+CIPCLOSE=%d", sock->link_id);
     bq_enqueue(&inst->tx_queue, buffer);
 }
 
-void socket_send(ESP32 *inst, struct at_socket *sock, char *data, int length) {
+void socket_send(struct esp32state *inst, struct at_socket *sock, char *data, int length) {
     char buffer[32];
     sprintf(buffer, "AT+CIPSEND=%d,%d", sock->link_id, length);
     bq_enqueue(&inst->tx_queue, buffer);
