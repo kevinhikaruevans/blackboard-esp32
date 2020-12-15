@@ -10,7 +10,7 @@
 #include "xuartps_hw.h"
 #include "commands/at_command.h"
 #include "types.h"
-
+#include "gic.h"
 /**
  * TODO: make these consistent
  *     -> naming
@@ -46,6 +46,7 @@
 #define GPIO_OEN(n)            *(((uint32_t*) 0xE000A208) + 16*n)
 
 
+void esp32_init(struct esp32state *);
 void esp32_enable_module(struct esp32state *);
 void esp32_enable_uart(struct esp32state *);
 void esp32_state_init(struct esp32state *);
