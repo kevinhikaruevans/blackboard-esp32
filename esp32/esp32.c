@@ -1,6 +1,17 @@
 #include "esp32.h"
 
 /**
+ * Fully initializes the ESP32 and enables it.
+ * @param inst The esp32state instance
+ */
+void esp32_init(struct esp32state *inst) {
+    esp32_state_init(inst);
+    esp32_interrupts_config(inst);
+    esp32_enable_uart(inst);
+    esp32_enable_module(inst);
+}
+
+/**
  * Resets the ESP32 state to an empty one, defaulting to `off'.
  * @param inst The instance to initialize.
  */
