@@ -55,3 +55,5 @@ dkms.conf
 # Doxygen files
 html/
 latex/
+
+workspace/
