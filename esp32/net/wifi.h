@@ -6,8 +6,8 @@
 #include "../types.h"
 #include "../bq.h"
 
-void wifi_init(ESP32 *inst);
-void wifi_connect(ESP32 *inst, const char *ssid, const char *psk);
-void wifi_disconnect(ESP32 *);
+void wifi_init(struct esp32state *inst);
+void wifi_connect(struct esp32state *inst, const char *ssid, const char *psk);
+void wifi_disconnect(struct esp32state *);
 
 #endif

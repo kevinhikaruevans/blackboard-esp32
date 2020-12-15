@@ -4,7 +4,7 @@
  * Resets the ESP32 state to an empty one, defaulting to `off'.
  * @param inst The instance to initialize.
  */
-void esp32_state_init(ESP32 *inst) {
+void esp32_state_init(struct esp32state *inst) {
     inst->boot_status = ESP32_STATUS_OFF;
     inst->char_recv = &esp32_char_recv;
     inst->on_receive = &esp32_on_receive;
@@ -26,11 +26,11 @@ void esp32_state_init(ESP32 *inst) {
  * @param inst The ESP32 state instance
  * @param on_ready The callback function called when the ESP32 is booted.
  */
-void esp32_set_ready(ESP32 *inst, void (*on_ready)(ESP32 *)) {
+void esp32_set_ready(struct esp32state *inst, void (*on_ready)(struct esp32state *)) {
     inst->on_ready = on_ready;
 }
 
-void esp32_set_receive(ESP32 *inst, void (*on_receive)(ESP32 *, char)) {
+void esp32_set_receive(struct esp32state *inst, void (*on_receive)(struct esp32state *, char)) {
     inst->on_receive = on_receive;
 }
 
@@ -38,7 +38,7 @@ void esp32_set_receive(ESP32 *inst, void (*on_receive)(ESP32 *, char)) {
  * Called by the ISR when a character is received.
  * @param inst The ESP32 state instance
  */
-void esp32_char_recv(ESP32 *inst) {
+void esp32_char_recv(struct esp32state *inst) {
     char c = *((uint32_t *)UART0_FIFO_ADDR);
 
     //esp32_on_receive(inst, c);
@@ -47,7 +47,7 @@ void esp32_char_recv(ESP32 *inst) {
     esp32_clear_interrupts();
 }
 
-void esp32_on_receive(ESP32 *inst, char c) {
+void esp32_on_receive(struct esp32state *inst, char c) {
     char *line = bq_putc(&inst->rx_queue, c);
 
     if (line != NULL && strstr(line, "+IPD") == line) {
@@ -68,7 +68,7 @@ void esp32_clear_interrupts() {
  * TODO rename the function? `run' implies too much, whereas process is more apt?
  * @param inst The ESP32 state instance
  */
-void esp32_run_queue(ESP32 *inst) {
+void esp32_run_queue(struct esp32state *inst) {
 	// handle receiving:
 	char *line = bq_dequeue(&inst->rx_queue);
 
@@ -106,7 +106,7 @@ void esp32_run_queue(ESP32 *inst) {
  * @param buffer The buffer to write
  * @returns The number of bytes transmitted
  */
-int esp32_println(ESP32 *inst, char *buffer) {
+int esp32_println(struct esp32state *inst, char *buffer) {
     int i = 0;
     int length = strlen(buffer);
     char c;
@@ -143,7 +143,7 @@ int esp32_println(ESP32 *inst, char *buffer) {
  * Configure and enable the ESP32 module
  * @param inst The ESP32 state instance
  */
-void esp32_enable_module(ESP32 *inst) {
+void esp32_enable_module(struct esp32state *inst) {
     // unlock system level control
     SLCR_UNLOCK = UNLOCK_KEY;
 
@@ -172,7 +172,7 @@ void esp32_enable_module(ESP32 *inst) {
  * Configure and enable UART0
  * @param inst The ESP32 state instance
  */
-void esp32_enable_uart(ESP32 *inst) {
+void esp32_enable_uart(struct esp32state *inst) {
     /*
      * could use Xilinx's libs for this bit, or we could
      * just use the normal ptr things

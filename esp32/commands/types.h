@@ -25,7 +25,7 @@ typedef enum at_command_status {
  */
 typedef struct at_command {
     char name[AT_CMD_NAME_SIZE]; /*!< The command itself, e.g. AT or AT+CWJAP */
-    ATCommandStatus (*callback)(ESP32 *, const char *); /*!< The callback function for the command */
+    ATCommandStatus (*callback)(struct esp32state *, const char *); /*!< The callback function for the command */
 } ATCommand;
 
 #endif

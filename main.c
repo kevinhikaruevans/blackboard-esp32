@@ -12,7 +12,7 @@
 #include "sleep.h"
 
 #include "esp32/net/socket.h"
-
+#include "wifi_config.h"
 
 
 void on_success(struct esp32state *inst, struct http_message *client) {
@@ -28,15 +28,15 @@ void on_connect(struct esp32state *inst) {
 }
 
 
-void esp32_ready(ESP32 *inst) {
+void esp32_ready(struct esp32state *inst) {
     inst->wifi_state.on_connect = &on_connect;
-    wifi_connect(inst, "dd-wrt", "");
+    wifi_connect(inst, WIFI_SSID, WIFI_PSK);
 
 }
 
 int main()
 {
-    ESP32 esp32;
+    struct esp32state esp32;
     esp32_state_init(&esp32);
     esp32_interrupts_config(&esp32);
     esp32_enable_uart(&esp32);
