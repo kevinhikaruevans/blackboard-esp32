@@ -1,2 +1,2 @@
 #define WIFI_SSID ""
-#define WIFI_PSK ""
+#define WIFI_PSK  ""
