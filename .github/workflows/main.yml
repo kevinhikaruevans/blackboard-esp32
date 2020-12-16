@@ -30,7 +30,7 @@ jobs:
         # You may pin to the exact commit or the version.
         # uses: DoozyX/clang-format-lint-action@84b814a54950e27ac65a62069802df099405ef77
         uses: DoozyX/clang-format-lint-action@v0.11
-        with:
+        #with:
           # Source folder to check formatting
           #source: # optional, default is .
           # Folder to exclude from formatting check
