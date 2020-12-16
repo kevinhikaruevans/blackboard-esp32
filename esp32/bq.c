@@ -4,7 +4,7 @@
  * Initializes a queue to an empty state.
  * @param bq The buffer queue to initialize
  */
-void bq_init(BufferQueue *bq) {
+void bq_init(struct bufferqueue *bq) {
   bq->buffer_index       = 0;
   bq->char_index         = 0;
   bq->queue_buffer_index = BQ_IDX_INACTIVE;
@@ -17,7 +17,7 @@ void bq_init(BufferQueue *bq) {
  * @param c The character to append
  * @returns a non-NULL value if the command requires immediate processing.
  */
-char *bq_putc(BufferQueue *bq, char c) {
+char *bq_putc(struct bufferqueue *bq, char c) {
   char *ret = NULL;
 
   if (bq == NULL)
@@ -74,7 +74,7 @@ char *bq_putc(BufferQueue *bq, char c) {
  * @param bq The queue to add to
  * @param str The string to enqueue
  */
-void bq_enqueue(BufferQueue *bq, const char *str) {
+void bq_enqueue(struct bufferqueue *bq, const char *str) {
   if (bq == NULL || str == NULL) {
     return;
   }
@@ -115,7 +115,7 @@ void bq_enqueue(BufferQueue *bq, const char *str) {
  * @param bq The queue to dequeue from
  * @returns the next line or NULL if the queue is empty
  */
-char *bq_dequeue(BufferQueue *bq) {
+char *bq_dequeue(struct bufferqueue *bq) {
   if (bq == NULL) {
     return NULL;
   }
@@ -145,7 +145,7 @@ char *bq_dequeue(BufferQueue *bq) {
  * @param buffer The current line, i.e. the line to offset from.
  * @returns Returns the last line.
  */
-char *bq_prev_buffer(BufferQueue *bq, char *buffer) {
+char *bq_prev_buffer(struct bufferqueue *bq, char *buffer) {
   if (buffer <= bq->buffers[0]) {
     return (char *)&bq->buffers[BQ_SCROLLBACK_SIZE - 1];
   }

@@ -10,8 +10,8 @@ enum esp32_subsystem { ESP32_GLOBAL, ESP32_WIFI };
  * the associated callback functions.
  */
 struct esp32state {
-  BufferQueue rx_queue; /*!< queue for data received */
-  BufferQueue tx_queue; /*!< queue for commands to send */
+  struct bufferqueue rx_queue; /*!< queue for data received */
+  struct bufferqueue tx_queue; /*!< queue for commands to send */
 
   enum esp32bootstatus {
     ESP32_STATUS_OFF,

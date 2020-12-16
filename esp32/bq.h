@@ -12,18 +12,18 @@
 /**
  * A simple rx/tx queue using a circular buffer of strings.
  */
-typedef struct bufferqueue {
+struct bufferqueue {
   volatile char buffers[BQ_SCROLLBACK_SIZE]
                        [BQ_BUFFER_SIZE]; /*!< Arrays of strings */
   volatile int char_index;   /*!< The index of the character in a line buffer,
                                 i.e. the column. */
   volatile int buffer_index; /*!< The index of the enqueing */
   volatile int queue_buffer_index; /*!< The index of the dequeuing */
-} BufferQueue;
+};
 
-void  bq_init(BufferQueue *);
-char *bq_putc(BufferQueue *bq, char c);
-void  bq_enqueue(BufferQueue *bq, const char *str);
-char *bq_dequeue(BufferQueue *bq);
+void  bq_init(struct bufferqueue *);
+char *bq_putc(struct bufferqueue *, char);
+void  bq_enqueue(struct bufferqueue *, const char *);
+char *bq_dequeue(struct bufferqueue *);
 
 #endif
