@@ -11,21 +11,24 @@
  * - merging set/query commands to a single at_command instance
  * - have 2 or 3 callback functions in at_command
  * - handler depends on whether or not the line contains a `=` or `?`
- *      - e.g. if you do `AT+CWJAP`, it'll call the 'set' callback in `at_command`
+ *      - e.g. if you do `AT+CWJAP`, it'll call the 'set' callback in
+ * `at_command`
  * - DUNNO
  */
 
 typedef enum at_command_status {
-    COMMAND_WAITING,
-    COMMAND_DONE
+  COMMAND_WAITING,
+  COMMAND_DONE
 } ATCommandStatus;
 
 /**
  * Container for commands and their associated callback functions
  */
 typedef struct at_command {
-    char name[AT_CMD_NAME_SIZE]; /*!< The command itself, e.g. AT or AT+CWJAP */
-    ATCommandStatus (*callback)(struct esp32state *, const char *); /*!< The callback function for the command */
+  char name[AT_CMD_NAME_SIZE]; /*!< The command itself, e.g. AT or AT+CWJAP */
+  ATCommandStatus (*callback)(
+      struct esp32state *,
+      const char *); /*!< The callback function for the command */
 } ATCommand;
 
 #endif
