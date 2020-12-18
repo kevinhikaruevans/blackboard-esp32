@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="ASCII"?>
+<sdkproject:SdkProject xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:sdkproject="http://www.xilinx.com/sdkproject" name="blackboard-esp32" location="/home/kevin/Documents/GitHub/blackboard-esp32/workspace/blackboard-esp32" platform="/home/kevin/Documents/GitHub/blackboard-esp32/workspace/BlackBoard_revB_bist_v1_00_beta_2/export/BlackBoard_revB_bist_v1_00_beta_2/BlackBoard_revB_bist_v1_00_beta_2.xpfm" platformUID="xilinx:::0.0(custom)" systemProject="blackboard_system" sysConfig="BlackBoard_revB_bist_v1_00_beta_2" runtime="cpp" cpu="standalone_ps7_cortexa9_0" cpuInstance="ps7_cortexa9_0" os="standalone" isStaticLib="true" mssSignature="5124f8e2d7ad03d0c2f9851e683a3e1b">
+  <configuration name="Debug" id="xilinx.gnu.armv7.staticlib.debug.20585815">
+    <configBuildOptions xsi:type="sdkproject:SdkOptions"/>
+    <lastBuildOptions xsi:type="sdkproject:SdkOptions"/>
+  </configuration>
+  <configuration name="Release" id="xilinx.gnu.armv7.staticlib.release.827395643" dirty="true">
+    <configBuildOptions xsi:type="sdkproject:SdkOptions"/>
+  </configuration>
+  <template appTemplateName="empty_application"/>
+</sdkproject:SdkProject>
