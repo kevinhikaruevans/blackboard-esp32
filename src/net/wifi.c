@@ -1,4 +1,4 @@
-#include "wifi.h"
+#include "net/wifi.h"
 
 void wifi_init(struct esp32state *inst) {
   inst->wifi_state.wifi_status = WIFI_DISCONNECTED;
