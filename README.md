@@ -3,6 +3,8 @@ Connect to the on-board ESP32 on the [RealDigital Blackboard](https://realdigita
 
 :radioactive:  **Note:** This is only tested on the Rev. B board. Feel free to email me if you're interested in the project and I can add you as a maintainer, or you can just encourage me to work on this. 
 
+## Examples
+There is a Github repository containing examples, over at [blackboard-esp32-examples](https://github.com/kevinhikaruevans/blackboard-esp32-examples).
 
 ## Current status
 
