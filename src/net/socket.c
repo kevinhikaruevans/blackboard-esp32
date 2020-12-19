@@ -1,4 +1,4 @@
-#include "socket.h"
+#include "net/socket.h"
 
 const char AT_SOCKET_PROTOCOLS_STR[3][4] = {"TCP", "UDP", "SSL"};
 

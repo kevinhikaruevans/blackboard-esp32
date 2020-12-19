@@ -1,4 +1,4 @@
-#include "at_callbacks.h"
+#include "commands/at_callbacks.h"
 
 struct at_command esp32_commands[10] = {
     {"AT", &esp32_callback_at},

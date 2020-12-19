@@ -56,5 +56,9 @@ dkms.conf
 html/
 latex/
 
-workspace/
+Debug/
+Release/
+
 wifi_config.h
+
+
